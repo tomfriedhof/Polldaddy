@@ -25,7 +25,9 @@ function polldaddy_uninstall() {
  * Implements hook_enable().
  */
 function polldaddy_enable() {
-  drupal_set_message(t('To use polldaddy, find the "Add poll block" tab (or button) on the <a href="@url">administer blocks page</a>.', array('@url' => url('admin/build/block'))));
+  if (module_exists('block')) {
+    drupal_set_message(t('To use polldaddy, find the "Add poll block" tab (or button) on the <a href="@url">administer blocks page</a>.', array('@url' => url('admin/build/block'))));
+  }
 }
 
 /**
