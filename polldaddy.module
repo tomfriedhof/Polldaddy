@@ -105,28 +105,35 @@ function polldaddy_block_view($delta = NULL) {
     ";    
   }
 
+  $block = array();
+  $block['subject'] = '';
+  $block['content'] = $css . polldaddy_poll_view($poll_id);
+  return $block;
+}
 
-  //drupal_add_css($css);
-
-
-  $callback = '<script type="text/javascript" charset="utf-8">
+/**
+ * Render a polldaddy poll.
+ */
+function polldaddy_poll_view($poll_id) {
+  $output = '<script type="text/javascript" charset="utf-8">
       var pd_callback_'.$poll_id.' = function(){
         $("'.$id.'").hide();
         $.getJSON("/ajax/vote",function(d){
           location.reload(true);
         })
       };
-	</script>';
+  </script>';
+  
   $voted = '';
   if($_SESSION['polldaddy']['voted']){
     $voted = '<script type="text/javascript" charset="utf-8">
       location.href = "javascript:PD_vote'.$poll_id.'(1)";
-	</script>';
+  </script>';
   }
-  $block = array();
-  $block['subject'] = '';
-  $block['content'] = $css.$callback.'<script type="text/javascript" charset="utf-8" src="http://static.polldaddy.com/p/'.$poll_id.'.js"></script>'.$voted;;
-  return $block;
+  
+  $output .= '<script type="text/javascript" charset="utf-8" src="http://static.polldaddy.com/p/'.$poll_id.'.js"></script>';
+  $output .= $voted;
+  return $output;
 }
 
 /**
@@ -181,4 +188,13 @@ function _polldaddy_format_title($config) {
   $polls = polldaddy_get_polls();
   
   return 'Poll "'.$polls[$config['poll_id']].'"';
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function polldaddy_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && $plugin_type == 'content_types') {
+    return 'plugins/' . $plugin_type;
+  }
 }

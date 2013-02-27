@@ -59,8 +59,10 @@ function polldaddy_get_usercode($APIKey){
 }
 
 /**
- * Creates a poll on polldaddy.
+ * Creates or updates a poll on polldaddy.
  * 
+ * @param $op
+ *   Create of Update.
  * @param $settings
  *   Polldaddy settings for connecting with API. Keyed array with at least a
  *   `polldaddy_partner_guid` key containing API key.
@@ -70,20 +72,15 @@ function polldaddy_get_usercode($APIKey){
  * @todo: The xml request in this needs to be abstracted, so that polls can be
  *   customized to a users content.
  */
-function polldaddy_create_poll($settings, $usercode) {
-  // Remove these lines. Local variables for now.
-  $settings = variable_get('polldaddy_settings', array('polldaddy_partner_guid' => '',
-                                                       'polldaddy_usercode' => ''));
-  $usercode = polldaddy_get_usercode($settings['polldaddy_partner_guid']);
-  
+function polldaddy_save_poll($op, $settings, $usercode) {
   $xml = <<<XMLREQ
 <?xml version="1.0" encoding="utf-8" ?>
 <pd:pdRequest xmlns:pd="http://api.polldaddy.com/pdapi.xsd" partnerGUID="{$settings['polldaddy_partner_guid']}">
   <pd:userCode>$usercode</pd:userCode>
   <pd:demands>
-    <pd:demand id="CreatePoll">
+    <pd:demand id="{$op}Poll">
       <pd:poll>
-        <pd:question>My Test Poll?</pd:question>
+        <pd:question>{$settings['polldaddy_name']}</pd:question>
         <pd:multipleChoice>no</pd:multipleChoice>
         <pd:randomiseAnswers>no</pd:randomiseAnswers>
         <pd:otherAnswer>no</pd:otherAnswer>
@@ -93,7 +90,7 @@ function polldaddy_create_poll($settings, $usercode) {
         <pd:comments>off</pd:comments>
         <pd:makePublic>no</pd:makePublic>
         <pd:closePoll>yes</pd:closePoll>
-        <pd:closeDate>2013-05-30T00:42:00</pd:closeDate>
+        <pd:closeDate>{$settings['polldaddy_closedate']}</pd:closeDate>
         <pd:styleID>4</pd:styleID>
         <pd:packID>11577</pd:packID>
         <pd:folderID>140644</pd:folderID>
@@ -101,10 +98,10 @@ function polldaddy_create_poll($settings, $usercode) {
         <pd:sharing>no</pd:sharing>
         <pd:answers>
           <pd:answer>
-            <pd:text>Blue Team</pd:text>
+            <pd:text>{$settings['polldaddy_answer1']}</pd:text>
           </pd:answer>
           <pd:answer>
-            <pd:text>Red Team</pd:text>
+            <pd:text>{$settings['polldaddy_answer2']}</pd:text>
           </pd:answer>
         </pd:answers>
       </pd:poll>
@@ -115,10 +112,8 @@ XMLREQ;
 
   $response = polldaddy_send_request($xml);
   $response = polldaddy_clear_request($response);
-  $parsed = polldaddy_parse_response($response);
-  print_r($parsed);
+  return polldaddy_parse_response($response);
 }
-
 
 function polldaddy_parse_response($response){
   $xml_parser = xml_parser_create();
