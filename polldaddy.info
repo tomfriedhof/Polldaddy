@@ -1,7 +1,7 @@
 name = Polldaddy
 description = "Provides integration with polldaddy.com services"
 package = Other
-core = 6.x
+core = 7.x
 
 dependencies[] = block
 

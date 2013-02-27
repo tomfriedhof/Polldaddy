@@ -8,16 +8,16 @@
  * Implements hook_menu().
  */
 function polldaddy_menu() {
-  $items['admin/build/block/add-polldaddy'] = array(
+  $items['admin/structure/block/add-polldaddy'] = array(
     'title' => 'Add poll block',
     'description' => 'Add a new poll block.',
     'access arguments' => array('administer blocks'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('polldaddy_add_block_form'),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_LOCAL_ACTION,
     'file' => 'polldaddy.admin.inc',
   );
-  $items['admin/build/block/delete-polldaddy'] = array(
+  $items['admin/structure/block/delete-polldaddy'] = array(
     'title' => 'Delete poll block',
     'access arguments' => array('administer blocks'),
     'page callback' => 'drupal_get_form',
@@ -48,55 +48,34 @@ function polldaddy_form_block_admin_display_form_alter(&$form, $form_state) {
 }
 
 /**
- * Implements hook_block().
+ * Implements hook_block_info().
  */
-function polldaddy_block($op = 'list', $delta = NULL, $edit = NULL) {
-  $function = '_polldaddy_block_' . $op;
-  if (function_exists($function)) {
-    return $function($delta, $edit);
+function polldaddy_block_info() {
+  $blocks = array();
+  foreach (variable_get('polldaddy_ids', array()) AS $delta) {
+    $blocks[$delta]['info'] = _polldaddy_format_title(polldaddy_get_config($delta));
+    // Menu blocks can't be cached because each menu item can have
+    // a custom access callback. menu.inc manages its own caching.
+    $blocks[$delta]['cache'] = BLOCK_NO_CACHE;
   }
-  else {
-    // "op"s besides "view" are seldom used, so we store them in a separate file.
-    module_load_include('inc', 'polldaddy', 'polldaddy.admin');
-    if (function_exists($function)) {
-      return $function($delta, $edit);
-    }
-  }
+  return $blocks;
 }
 
 /**
- * Returns the configuration for the requested block delta.
- *
- * @param $delta
- *   string The delta that uniquely identifies the block in the block system. If
- *   not specified, the default configuration will be returned.
- * @return
- *   array An associated array of configuration options.
+ * Implements hook_block_configure().
  */
-function polldaddy_get_config($delta = NULL) {
-  $config = array(
-    'delta'       => $delta,
-    'poll_id' => 0,
-  );
-
-  // Get the block configuration options.
-  if ($delta) {
-    $config['poll_id']  = variable_get("polldaddy_{$delta}_poll_id",  $config['poll_id']);
-    $config['use_style']  = variable_get("polldaddy_{$delta}_use_style",  $config['use_style']);
-  }
-
-  return $config;
+function polldaddy_block_configure($delta = NULL) {
+  module_load_include('inc', 'polldaddy', 'polldaddy.admin');
+  // Create a pseudo form state.
+  $form_state = array('values' => polldaddy_get_config($delta));
+  return polldaddy_configure_form($form_state);
 }
 
 /**
- * Returns the 'view' $op info for hook_block().
- *
- * @param $delta
- *   string The name of the block to render.
+ * Implements hook_block_view().
  */
-function _polldaddy_block_view($delta) {
-
-  $id = '.pane-polldaddy-'.$delta;
+function polldaddy_block_view($delta = NULL) {
+	$id = '.pane-polldaddy-'.$delta;
 
   $poll_id = variable_get("polldaddy_{$delta}_poll_id", 0);
   $use_style = variable_get("polldaddy_{$delta}_use_style", 0);
@@ -150,7 +129,56 @@ function _polldaddy_block_view($delta) {
   return $block;
 }
 
+/**
+ * Implements hook_block_save().
+ */
+function polldaddy_block_save($delta, $edit) {
+  variable_set("polldaddy_{$delta}_poll_id", $edit['poll_id']);
+  variable_set("polldaddy_{$delta}_use_style", $edit['use_style']);
+}
+
+/**
+ * Returns the configuration for the requested block delta.
+ *
+ * @param $delta
+ *   string The delta that uniquely identifies the block in the block system. If
+ *   not specified, the default configuration will be returned.
+ * @return
+ *   array An associated array of configuration options.
+ */
+function polldaddy_get_config($delta = NULL) {
+  $config = array(
+    'delta'       => $delta,
+    'poll_id' => 0,
+  );
+
+  // Get the block configuration options.
+  if ($delta) {
+    $config['poll_id']  = variable_get("polldaddy_{$delta}_poll_id",  $config['poll_id']);
+    $config['use_style']  = variable_get("polldaddy_{$delta}_use_style",  $config['use_style']);
+  }
+
+  return $config;
+}
+
 function polldaddy_page_reload(){
   $_SESSION['polldaddy']['voted'] = TRUE;
   return drupal_json(array('status' => 'ok'));
+}
+
+/**
+ * Return the title of the block.
+ *
+ * @param $config
+ *   array The configuration of the menu block.
+ * @return
+ *   string The title of the block.
+ */
+function _polldaddy_format_title($config) {
+  module_load_include('php', 'polldaddy', 'polldaddy.api');
+  
+  // If an administrative title is specified, use it.
+  $polls = polldaddy_get_polls();
+  
+  return 'Poll "'.$polls[$config['poll_id']].'"';
 }

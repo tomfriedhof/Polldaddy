@@ -9,9 +9,9 @@ require_once('polldaddy.api.php');
 /**
  * Menu callback: display the block addition form.
  */
-function polldaddy_add_block_form(&$form_state) {
+function polldaddy_add_block_form($form, &$form_state) {
   module_load_include('inc', 'block', 'block.admin');
-  return block_admin_configure($form_state, 'polldaddy', NULL);
+  return block_admin_configure($form, $form_state, 'polldaddy', NULL);
 }
 
 /**
@@ -27,23 +27,53 @@ function polldaddy_add_block_form_submit($form, &$form_state) {
   variable_set('polldaddy_ids', $block_ids);
 
   // Save the block configuration.
-  _polldaddy_block_save($delta, $form_state['values']);
+  polldaddy_block_save($delta, $form_state['values']);
 
   // Run the normal new block submission (borrowed from block_add_block_form_submit).
+  // Store block delta to allow other modules to work with new block.
+  $form_state['values']['delta'] = $delta;
+
+  $query = db_insert('block')->fields(array('visibility', 'pages', 'custom', 'title', 'module', 'theme', 'status', 'weight', 'delta', 'cache'));
   foreach (list_themes() as $key => $theme) {
     if ($theme->status) {
-      db_query("INSERT INTO {blocks} (visibility, pages, custom, title, module, theme, status, weight, delta, cache) VALUES(%d, '%s', %d, '%s', '%s', '%s', %d, %d, %d, %d)", $form_state['values']['visibility'], trim($form_state['values']['pages']), $form_state['values']['custom'], $form_state['values']['title'], $form_state['values']['module'], $theme->name, 0, 0, $delta, BLOCK_NO_CACHE);
+      $query->values(array(
+        'visibility' => (int) $form_state['values']['visibility'],
+        'pages' => trim($form_state['values']['pages']),
+        'custom' => (int) $form_state['values']['custom'],
+        'title' => $form_state['values']['title'],
+        'module' => $form_state['values']['module'],
+        'theme' => $theme->name,
+        'status' => 0,
+        'weight' => 0,
+        'delta' => $delta,
+        'cache' => DRUPAL_NO_CACHE,
+      ));
     }
   }
+  $query->execute();
 
+  $query = db_insert('block_role')->fields(array('rid', 'module', 'delta'));
   foreach (array_filter($form_state['values']['roles']) as $rid) {
-    db_query("INSERT INTO {blocks_roles} (rid, module, delta) VALUES (%d, '%s', '%s')", $rid, $form_state['values']['module'], $delta);
+    $query->values(array(
+      'rid' => $rid,
+      'module' => $form_state['values']['module'],
+      'delta' => $delta,
+    ));
+  }
+  $query->execute();
+
+  // Store regions per theme for this block
+  foreach ($form_state['values']['regions'] as $theme => $region) {
+    db_merge('block')->key(array('theme' => $theme, 'delta' => $delta, 'module' => $form_state['values']['module']))->fields(array(
+      'region' => ($region == BLOCK_REGION_NONE ? '' : $region),
+      'pages' => trim($form_state['values']['pages']),
+      'status' => (int) ($region != BLOCK_REGION_NONE),
+    ))->execute();
   }
 
   drupal_set_message(t('The block has been created.'));
   cache_clear_all();
-
-  $form_state['redirect'] = 'admin/build/block';
+  $form_state['redirect'] = 'admin/structure/block';
   return;
 }
 
@@ -108,30 +138,6 @@ function _polldaddy_block_list() {
 }
 
 /**
- * Return the title of the block.
- *
- * @param $config
- *   array The configuration of the menu block.
- * @return
- *   string The title of the block.
- */
-function _polldaddy_format_title($config) {
-  // If an administrative title is specified, use it.
-  $polls = polldaddy_get_polls();
-  
-  return 'Poll "'.$polls[$config['poll_id']].'"';
-}
-
-/**
- * Returns the 'configure' $op info for hook_block().
- */
-function _polldaddy_block_configure($delta) {
-  // Create a pseudo form state.
-  $form_state = array('values' => polldaddy_get_config($delta));
-  return polldaddy_configure_form($form_state);
-}
-
-/**
  * Returns the configuration form for a menu tree.
  *
  * @param $form_state
@@ -172,14 +178,6 @@ function polldaddy_configure_form(&$form_state) {
 
   $form['polldaddy-wrapper-close'] = array('#value' => '</div>');
   return $form;
-}
-
-/**
- * Returns the 'save' $op info for hook_block().
- */
-function _polldaddy_block_save($delta, $edit) {
-  variable_set("polldaddy_{$delta}_poll_id", $edit['poll_id']);
-  variable_set("polldaddy_{$delta}_use_style", $edit['use_style']);
 }
 
 /**
