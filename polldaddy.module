@@ -75,7 +75,7 @@ function polldaddy_block_configure($delta = NULL) {
  * Implements hook_block_view().
  */
 function polldaddy_block_view($delta = NULL) {
-	$id = '.pane-polldaddy-'.$delta;
+  $id = '.pane-polldaddy-'.$delta;
 
   $poll_id = variable_get("polldaddy_{$delta}_poll_id", 0);
   $use_style = variable_get("polldaddy_{$delta}_use_style", 0);
@@ -115,24 +115,9 @@ function polldaddy_block_view($delta = NULL) {
  * Render a polldaddy poll.
  */
 function polldaddy_poll_view($poll_id) {
-  $output = '<script type="text/javascript" charset="utf-8">
-      var pd_callback_'.$poll_id.' = function(){
-        $("'.$id.'").hide();
-        $.getJSON("/ajax/vote",function(d){
-          location.reload(true);
-        })
-      };
-  </script>';
-  
-  $voted = '';
-  if($_SESSION['polldaddy']['voted']){
-    $voted = '<script type="text/javascript" charset="utf-8">
-      location.href = "javascript:PD_vote'.$poll_id.'(1)";
-  </script>';
-  }
-  
-  $output .= '<script type="text/javascript" charset="utf-8" src="http://static.polldaddy.com/p/'.$poll_id.'.js"></script>';
-  $output .= $voted;
+  drupal_add_library('system', 'jquery.cookie');
+  drupal_add_js(drupal_get_path('module', 'polldaddy') . '/js/track_votes.js');
+  $output = '<script type="text/javascript" charset="utf-8" src="http://static.polldaddy.com/p/'.$poll_id.'.js"></script>';
   return $output;
 }
 
