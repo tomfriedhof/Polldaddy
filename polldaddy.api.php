@@ -3,7 +3,7 @@
  * @file
  * Provides functions for interacting directly with polldaddy API.
  */
- 
+
 function polldaddy_send_request($xml){
   $fp = fsockopen('api.polldaddy.com', 80,
                   $err_num, $err_str, 3);
@@ -60,7 +60,7 @@ function polldaddy_get_usercode($APIKey){
 
 /**
  * Creates or updates a poll on polldaddy.
- * 
+ *
  * @param $op
  *   Create of Update.
  * @param $settings
@@ -68,7 +68,7 @@ function polldaddy_get_usercode($APIKey){
  *   `polldaddy_partner_guid` key containing API key.
  * @param $usercode
  *   The usercode returned from polldaddy to send with request.
- * 
+ *
  * @todo: The xml request in this needs to be abstracted, so that polls can be
  *   customized to a users content.
  */
@@ -91,7 +91,7 @@ function polldaddy_save_poll($op, $settings, $usercode) {
         <pd:makePublic>no</pd:makePublic>
         <pd:closePoll>yes</pd:closePoll>
         <pd:closeDate>{$settings['polldaddy_closedate']}</pd:closeDate>
-        <pd:styleID>4</pd:styleID>
+        <pd:styleID>203177</pd:styleID>
         <pd:packID>11577</pd:packID>
         <pd:folderID>140644</pd:folderID>
         <pd:languageID>30</pd:languageID>
@@ -146,6 +146,6 @@ function polldaddy_get_polls(){
       $polls[$poll['attributes']['ID']] = $poll['value'];
     }
   }
-  
+
   return $polls;
 }
