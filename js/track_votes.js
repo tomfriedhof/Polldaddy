@@ -9,10 +9,12 @@
     attach: function (context) {
       var self = this;
       var polldaddyVotes = $.cookie('polldaddyVotes') ? JSON.parse($.cookie('polldaddyVotes')) : {};
-
+      
       $.each(polldaddyVotes, function(index, value) {
         callback = 'PD_vote' + value;
-        window[callback].call(this, 1);
+        if (window[callback]) {
+          window[callback].call(this, 1);
+        }
       });
       
       $('.PDS_Poll .pds-votebutton').click(function() {

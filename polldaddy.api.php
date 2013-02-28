@@ -5,11 +5,14 @@
  */
  
 function polldaddy_send_request($xml){
-  $fp = fsockopen('api.polldaddy.com', 80,
-                  $err_num, $err_str, 3);
-  if(!$fp) {
-    $errors[-1] = "Can't connect";
-    return false;
+  try {
+    $fp = fsockopen('api.polldaddy.com', 80, $err_num, $err_str, 3);
+    if(!$fp) {
+      throw new Exception($err_num . ': ' . $err_str);
+    }
+  }
+  catch(Exception $e) {
+    print 'Failed to connect to api.polldaddy.com with message: ' . $e->getMessage() . "\n";
   }
 
   if(function_exists('stream_set_timeout')){
@@ -30,8 +33,6 @@ function polldaddy_send_request($xml){
   }
   fclose($fp);
 
-
-
   if(!$response){
     $errors[-2] = 'No Data';
   }
@@ -49,6 +50,7 @@ function polldaddy_get_usercode($APIKey){
   $response = polldaddy_send_request($xml);
   $response = polldaddy_clear_request($response);
   $parsed = polldaddy_parse_response($response);
+  
   $usercode = '';
   for($i = 0; $i < 6; $i++){
     if($parsed[$i]['tag'] == 'PD:USERCODE'){
@@ -73,13 +75,14 @@ function polldaddy_get_usercode($APIKey){
  *   customized to a users content.
  */
 function polldaddy_save_poll($op, $settings, $usercode) {
+  $pollid = $settings['polldaddy_pollid'] ? ' id="' . $settings['polldaddy_pollid'] .'"' : '';
   $xml = <<<XMLREQ
 <?xml version="1.0" encoding="utf-8" ?>
 <pd:pdRequest xmlns:pd="http://api.polldaddy.com/pdapi.xsd" partnerGUID="{$settings['polldaddy_partner_guid']}">
   <pd:userCode>$usercode</pd:userCode>
   <pd:demands>
     <pd:demand id="{$op}Poll">
-      <pd:poll>
+      <pd:poll$pollid>
         <pd:question>{$settings['polldaddy_name']}</pd:question>
         <pd:multipleChoice>no</pd:multipleChoice>
         <pd:randomiseAnswers>no</pd:randomiseAnswers>
