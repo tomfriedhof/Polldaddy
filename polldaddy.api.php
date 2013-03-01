@@ -91,7 +91,7 @@ function polldaddy_save_poll($op, $settings, $usercode) {
         <pd:makePublic>no</pd:makePublic>
         <pd:closePoll>yes</pd:closePoll>
         <pd:closeDate>{$settings['polldaddy_closedate']}</pd:closeDate>
-        <pd:styleID>203177</pd:styleID>
+        <pd:styleID>{$settings['polldaddy_style_id']}</pd:styleID>
         <pd:packID>11577</pd:packID>
         <pd:folderID>140644</pd:folderID>
         <pd:languageID>30</pd:languageID>
