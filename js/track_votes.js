@@ -17,7 +17,7 @@
         }
       });
       
-      $('.PDS_Poll .pds-votebutton').click(function() {
+      $('.PDS_Poll .pds-vote-button').click(function() {
         var buttonPrefix = "pd-vote-button";
         var pollId = this.id.substr(buttonPrefix.length);
         // Blindly adding polls to a cookie, but they should only be added only
