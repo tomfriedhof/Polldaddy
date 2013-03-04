@@ -159,7 +159,7 @@ function polldaddy_configure_form(&$form_state) {
     '#value' => '<div id="polldaddy-settings" class="polldaddy-configure-form">',
   );
   $polls = polldaddy_get_polls();
-  
+
   $form['poll_id'] = array(
     '#type' => 'select',
     '#default_value' => $config['poll_id']?$config['poll_id']:'',
@@ -196,6 +196,11 @@ function polldaddy_admin_settings_form($form_state) {
       '#title' => 'Partner GUID',
       '#default_value' => $settings['polldaddy_partner_guid']?$settings['polldaddy_partner_guid']:''
     ),
+    'polldaddy_style_id' => array (
+      '#type' => 'textfield',
+      '#title' => 'Style Id',
+      '#default_value' => $settings['polldaddy_style_id']?$settings['polldaddy_style_id']:''
+    ),
   );
   $form['submit'] = array(
     '#type' => 'submit',
@@ -211,6 +216,7 @@ function polldaddy_admin_settings_form($form_state) {
 function polldaddy_admin_settings_form_submit($form, &$form_state) {
   $settings = array();
   $settings['polldaddy_partner_guid']  = $form_state['values']['polldaddy_partner_guid'];
+  $settings['polldaddy_style_id']  = $form_state['values']['polldaddy_style_id'];
   $old_settings = variable_get('polldaddy_settings', array());
   $usercode = polldaddy_get_usercode($settings['polldaddy_partner_guid']);
   //drupal_set_message($usercode);
