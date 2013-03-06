@@ -76,6 +76,17 @@ function polldaddy_get_usercode($APIKey){
  */
 function polldaddy_save_poll($op, $settings, $usercode) {
   $pollid = $settings['polldaddy_pollid'] ? ' id="' . $settings['polldaddy_pollid'] .'"' : '';
+  
+  // Generate the answers section xml
+  $answer_xml = '';
+  foreach ($settings['polldaddy_answers'] as $answer_id => $answer) {
+    // If the answer is above 1000, it's safe to consider it being an id.
+    $answer_attribute = $answer_id > 1000 ? ' id="' . $answer_id . '"' : '';
+    $answer_xml .= "<pd:answer$answer_attribute>
+      <pd:text>$answer</pd:text>
+    </pd:answer>";
+  }
+
   $xml = <<<XMLREQ
 <?xml version="1.0" encoding="utf-8" ?>
 <pd:pdRequest xmlns:pd="http://api.polldaddy.com/pdapi.xsd" partnerGUID="{$settings['polldaddy_partner_guid']}">
@@ -100,12 +111,7 @@ function polldaddy_save_poll($op, $settings, $usercode) {
         <pd:languageID>30</pd:languageID>
         <pd:sharing>no</pd:sharing>
         <pd:answers>
-          <pd:answer>
-            <pd:text>{$settings['polldaddy_answer1']}</pd:text>
-          </pd:answer>
-          <pd:answer>
-            <pd:text>{$settings['polldaddy_answer2']}</pd:text>
-          </pd:answer>
+          $answer_xml
         </pd:answers>
       </pd:poll>
     </pd:demand>
