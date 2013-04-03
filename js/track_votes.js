@@ -7,8 +7,9 @@
 (function ($) {
   Drupal.behaviors.polldaddyVotes = {
     attach: function (context) {
+      var cookieName = 'polldaddyVotes' + window.location.pathname.replace("/", "-");
       var self = this;
-      var polldaddyVotes = $.cookie('polldaddyVotes') ? JSON.parse($.cookie('polldaddyVotes')) : {};
+      var polldaddyVotes = $.cookie(cookieName) ? JSON.parse($.cookie(cookieName)) : {};
       
       $.each(polldaddyVotes, function(index, value) {
         callback = 'PD_vote' + value;
@@ -23,7 +24,7 @@
         // Blindly adding polls to a cookie, but they should only be added only
         // if they haven't been already.
         polldaddyVotes[pollId] = pollId;
-        $.cookie("polldaddyVotes", JSON.stringify(polldaddyVotes), { expires: 10000, path: '/' });
+        $.cookie(cookieName, JSON.stringify(polldaddyVotes), { expires: 1, path: '/' });
       });
       
       
