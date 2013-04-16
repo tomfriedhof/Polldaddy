@@ -188,18 +188,19 @@ function polldaddy_configure_form(&$form_state) {
  */
 function polldaddy_admin_settings_form($form_state) {
   $settings = variable_get('polldaddy_settings', array('polldaddy_partner_guid' => '',
-                                                       'polldaddy_usercode' => ''));
+                                                       'polldaddy_usercode' => '',
+                                                       'polldaddy_style_id' => ''));
   //drupal_set_message(print_r($settings,1));
   $form['polldaddy_settings'] = array (
     'polldaddy_partner_guid' => array (
       '#type' => 'textfield',
       '#title' => 'Partner GUID',
-      '#default_value' => $settings['polldaddy_partner_guid']?$settings['polldaddy_partner_guid']:''
+      '#default_value' => $settings['polldaddy_partner_guid'],
     ),
     'polldaddy_style_id' => array (
       '#type' => 'textfield',
       '#title' => 'Style Id',
-      '#default_value' => $settings['polldaddy_style_id']?$settings['polldaddy_style_id']:''
+      '#default_value' => $settings['polldaddy_style_id'],
     ),
   );
   $form['submit'] = array(
@@ -218,11 +219,14 @@ function polldaddy_admin_settings_form_submit($form, &$form_state) {
   $settings['polldaddy_partner_guid']  = $form_state['values']['polldaddy_partner_guid'];
   $settings['polldaddy_style_id']  = $form_state['values']['polldaddy_style_id'];
   $old_settings = variable_get('polldaddy_settings', array());
-  $usercode = polldaddy_get_usercode($settings['polldaddy_partner_guid']);
-  //drupal_set_message($usercode);
-  $settings['polldaddy_usercode'] = $usercode;
-  variable_set('polldaddy_settings', $settings);
-  //polldaddy_get_poll('4920991');
+  if ($settings['polldaddy_partner_guid']) {
+    // $usercode = polldaddy_get_usercode($settings['polldaddy_partner_guid']);
+    $settings['polldaddy_usercode'] = $usercode;
+    variable_set('polldaddy_settings', $settings);
+  }
+  else {
+    variable_del('polldaddy_settings');
+  }
 }
 
 function polldaddy_send_vote($poll_id, $answer_id){
