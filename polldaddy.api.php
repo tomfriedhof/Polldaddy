@@ -110,6 +110,7 @@ function polldaddy_save_poll($op, $settings, $usercode) {
         <pd:folderID>140644</pd:folderID>
         <pd:languageID>30</pd:languageID>
         <pd:sharing>no</pd:sharing>
+        <pd:results_order_by>{$settings['polldaddy_results_order_by']}</pd:results_order_by>
         <pd:answers>
           $answer_xml
         </pd:answers>
