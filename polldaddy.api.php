@@ -12,7 +12,8 @@ function polldaddy_send_request($xml){
     }
   }
   catch(Exception $e) {
-    print 'Failed to connect to api.polldaddy.com with message: ' . $e->getMessage() . "\n";
+    watchdog('polldaddy', "Failed to connect to api.polldaddy.com with message: '{$e->getMessage()}'", NULL, WATCHDOG_ERROR);
+    return NULL;
   }
 
   if(function_exists('stream_set_timeout')){
