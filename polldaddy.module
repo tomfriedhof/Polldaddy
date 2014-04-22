@@ -56,7 +56,7 @@ function polldaddy_block_info() {
     $blocks[$delta]['info'] = _polldaddy_format_title(polldaddy_get_config($delta));
     // Menu blocks can't be cached because each menu item can have
     // a custom access callback. menu.inc manages its own caching.
-    $blocks[$delta]['cache'] = BLOCK_NO_CACHE;
+    $blocks[$delta]['cache'] = DRUPAL_NO_CACHE;
   }
   return $blocks;
 }
@@ -87,14 +87,11 @@ function polldaddy_block_view($delta = NULL) {
     {$id} .pds-box {border: 0 none !important;width: auto !important;display: inline-block !important;}
     {$id} .pds-input-label {  width: auto !important;}
     {$id} .pds-answer{border: 0 none !important;padding: 0;}
-    {$id} .pds-vote-button, .pds-vote-button-load {background: url('/sites/all/modules/polldaddy/images/global-buttons-small-sprite.gif') no-repeat scroll 0 0 transparent !important;background-position: -47px 0 !important;width: 44px !important;border: 0 none !important;border-radius: 0 !important;padding: 0 !important;cursor: pointer;float: left;margin: 0 7px 0 0;cursor: pointer;display: block;height: 21px;overflow: hidden;text-indent: -9999px;-moz-border-radius: 0 !important;}
     {$id} .pds-vote-button:hover {background-position: -47px -21px !important;}
-    {$id} .pds-view-results {background: url('/sites/all/modules/polldaddy/images/global-buttons-small-sprite.gif') no-repeat scroll transparent !important;background-position: -91px 0 !important;width: 87px !important;border: 0 none !important;border-radius: 0 !important;padding: 0 !important;cursor: pointer;float: left;margin: 0 7px 0 0;cursor: pointer;display: block;height: 21px;overflow: hidden;text-indent: -9999px;}
     {$id} .pds-view-results:hover {background-position: -91px -21px !important;  }
     {$id} .pds-share{display: none !important;}
     {$id} .pds-pd-link{display: none !important;}
     {$id} .pds-links{display: inline !important;}
-    {$id} .pds-return-poll {background: url('/sites/all/modules/polldaddy/images/global-buttons-small-sprite.gif') no-repeat scroll transparent !important;background-position: -294px 0 !important;width: 87px !important;border: 0 none !important;border-radius: 0 !important;padding: 0 !important;cursor: pointer;float: left;margin: 0 7px 0 0;cursor: pointer;display: block;height: 21px;overflow: hidden;text-indent: -9999px;}
     {$id} .pds-return-poll:hover {background-position: -294px -21px !important;}
     {$id} .pds-answer-feedback{border: 0 none !important;}
     {$id} .pds-answer-feedback-bar {background: none repeat scroll 0 0 #EB1C21 !important;float: left;height: 10px !important;margin: 0 7px 2px 0;padding: 0;}
@@ -142,6 +139,7 @@ function polldaddy_get_config($delta = NULL) {
   $config = array(
     'delta'       => $delta,
     'poll_id' => 0,
+    'use_style' => '',
   );
 
   // Get the block configuration options.

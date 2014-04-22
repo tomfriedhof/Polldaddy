@@ -220,7 +220,7 @@ function polldaddy_admin_settings_form_submit($form, &$form_state) {
   $settings['polldaddy_style_id']  = $form_state['values']['polldaddy_style_id'];
   $old_settings = variable_get('polldaddy_settings', array());
   if ($settings['polldaddy_partner_guid']) {
-    // $usercode = polldaddy_get_usercode($settings['polldaddy_partner_guid']);
+    $usercode = polldaddy_get_usercode($settings['polldaddy_partner_guid']);
     $settings['polldaddy_usercode'] = $usercode;
     variable_set('polldaddy_settings', $settings);
   }
