@@ -162,7 +162,7 @@ function polldaddy_save_rating($op, $settings, $usercode) {
         "custom_star" : "{$settings['custom_star']}",
         "font_size" : "12px",
         "font_line_height" : "{$settings['font_line_height']}",
-        "font_color" : "#333333",
+        "font_color" : "{$settings['font_color']}",
         "font_align" : "left",
         "font_position" : "right",
         "font_family" : "verdana",
