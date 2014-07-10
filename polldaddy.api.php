@@ -151,7 +151,7 @@ function polldaddy_save_rating($op, $settings, $usercode) {
   <pd:userCode>$usercode</pd:userCode>
   <pd:demands>
     <pd:demand id="{$op}Rating">
-      <pd:rating id="{$settings['polldaddy_pollid']}" type='0'>
+      <pd:rating id="{$settings['polldaddy_pollid']}" type='{$settings['type_id']}'>
         <pd:date>{$settings['date']}</pd:date>
         <pd:name><![CDATA[{$settings['polldaddy_name']}]]></pd:name>
         <pd:folder_id>{$settings['folder_id']}</pd:folder_id>
