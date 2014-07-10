@@ -159,7 +159,7 @@ function polldaddy_save_rating($op, $settings, $usercode) {
         "type" : "{$settings['type']}",
         "size" : "{$settings['size']}",
         "star_color" : "{$settings['star_color']}",
-        "custom_star" : "",
+        "custom_star" : "{$settings['custom_star']}",
         "font_size" : "12px",
         "font_line_height" : "{$settings['font_line_height']}",
         "font_color" : "#333333",
