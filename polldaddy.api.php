@@ -177,8 +177,8 @@ function polldaddy_save_rating($op, $settings, $usercode) {
         "text_4_star" : "Good",
         "text_5_star" : "Excellent",
         "text_thank_you" : "{$settings['text_thank_you']}",
-        "text_rate_up" : "Rate Up",
-        "text_rate_down" : "Rate Down"
+        "text_rate_up" : "{$settings['text_rate_up']}",
+        "text_rate_down" : "{$settings['text_rate_down']}"
         }]]></pd:settings>
       </pd:rating>
     </pd:demand>
