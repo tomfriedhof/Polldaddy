@@ -126,6 +126,71 @@ XMLREQ;
   return polldaddy_parse_response($response);
 }
 
+/**
+ * Creates or updates a rating on polldaddy.
+ *
+ * @param $op
+ *   Create of Update.
+ * @param $settings
+ *   Polldaddy settings for connecting with API. Keyed array with at least a
+ *   `polldaddy_partner_guid` key containing API key.
+ * @param $usercode
+ *   The usercode returned from polldaddy to send with request.
+ *
+ * @todo: The xml request in this needs to be abstracted, so that polls can be
+ *   customized to a users content.
+ *
+ * @return function see polldaddy_parse_response().
+ */
+function polldaddy_save_rating($op, $settings, $usercode) {
+  $pollid = $settings['polldaddy_pollid'] ? ' id="' . $settings['polldaddy_pollid'] .'"' : '';
+
+  $xml = <<<XMLREQ
+<?xml version="1.0" encoding="utf-8" ?>
+<pd:pdRequest xmlns:pd="http://api.polldaddy.com/pdapi.xsd" partnerGUID="{$settings['polldaddy_partner_guid']}">
+  <pd:userCode>$usercode</pd:userCode>
+  <pd:demands>
+    <pd:demand id="{$op}Rating">
+      <pd:rating id="{$settings['polldaddy_pollid']}" type='{$settings['type_id']}'>
+        <pd:date>{$settings['date']}</pd:date>
+        <pd:name><![CDATA[{$settings['polldaddy_name']}]]></pd:name>
+        <pd:folder_id>{$settings['folder_id']}</pd:folder_id>
+        <pd:settings><![CDATA[{
+        "type" : "{$settings['type']}",
+        "size" : "{$settings['size']}",
+        "star_color" : "{$settings['star_color']}",
+        "custom_star" : "{$settings['custom_star']}",
+        "font_size" : "12px",
+        "font_line_height" : "{$settings['font_line_height']}",
+        "font_color" : "{$settings['font_color']}",
+        "font_align" : "left",
+        "font_position" : "right",
+        "font_family" : "verdana",
+        "font_bold" : "normal",
+        "font_italic" : "normal",
+        "text_vote" : "Vote",
+        "text_votes" : "Votes",
+        "text_rate_this" : "{$settings['text_rate_this']}",
+        "text_1_star" : "Very Poor",
+        "text_2_star" : "Poor",
+        "text_3_star" : "Average",
+        "text_4_star" : "Good",
+        "text_5_star" : "Excellent",
+        "text_thank_you" : "{$settings['text_thank_you']}",
+        "text_rate_up" : "{$settings['text_rate_up']}",
+        "text_rate_down" : "{$settings['text_rate_down']}"
+        }]]></pd:settings>
+      </pd:rating>
+    </pd:demand>
+  </pd:demands>
+</pd:pdRequest>
+XMLREQ;
+
+  $response = polldaddy_send_request($xml);
+  $response = polldaddy_clear_request($response);
+  return polldaddy_parse_response($response);
+}
+
 function polldaddy_parse_response($response){
   $xml_parser = xml_parser_create();
   $data = array();
