@@ -278,19 +278,20 @@ XMLREQ;
  *  The usercode returned from polldaddy to send with request.
  * @param $id
  *  The id of the rating to get.
+ * @param $increment
+ *  Increment the request count to get the latest result count. Polldaddy expects this to change it seems.
  * @return array
  *  Return from the polldaddy api.
  */
-function polldaddy_get_rating_results($settings, $usercode, $id) {
+function polldaddy_get_rating_results($settings, $usercode, $id, $increment) {
   $xml = <<<XMLREQ
 <?xml version="1.0" encoding="utf-8" ?>
 <pd:pdRequest xmlns:pd="http://api.polldaddy.com/pdapi.xsd" partnerGUID="{$settings['polldaddy_partner_guid']}">
     <pd:userCode>{$usercode}</pd:userCode>
     <pd:demands>
         <pd:demand id="GetRatingResults">
-            <pd:list start="0" end="10000" id="{$id}">
+            <pd:list start="0" end="{$increment}" id="{$id}">
                 <pd:period>ALL</pd:period>
-                                <pd:uid></pd:uid>
             </pd:list>
         </pd:demand>
     </pd:demands>
