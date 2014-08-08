@@ -288,7 +288,7 @@ function polldaddy_get_rating_results($settings, $usercode, $id) {
     <pd:userCode>{$usercode}</pd:userCode>
     <pd:demands>
         <pd:demand id="GetRatingResults">
-            <pd:list id="{$id}">
+            <pd:list start="0" end="10000" id="{$id}">
                 <pd:period>ALL</pd:period>
                                 <pd:uid></pd:uid>
             </pd:list>
