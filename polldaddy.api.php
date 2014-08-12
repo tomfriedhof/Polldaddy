@@ -226,3 +226,81 @@ function polldaddy_get_polls(){
 
   return $polls;
 }
+
+/**
+ * Gets ratings from polldaddy.
+ *
+ * @param $op
+ *   Create of Update.
+ * @param $settings
+ *   Polldaddy settings for connecting with API. Keyed array with at least a
+ *   `polldaddy_partner_guid` key containing API key.
+ * @param $usercode
+ *   The usercode returned from polldaddy to send with request.
+ *
+ * @todo: The xml request in this needs to be abstracted, so that polls can be
+ *   customized to a users content.
+ *
+ * @return function see polldaddy_parse_response().
+ */
+function polldaddy_get_ratings($op, $settings, $usercode) {
+  $xml = <<<XMLREQ
+<?xml version="1.0" encoding="utf-8" ?>
+<pd:pdRequest xmlns:pd="http://api.polldaddy.com/pdapi.xsd" partnerGUID="{$settings['polldaddy_partner_guid']}">
+    <pd:userCode>{$usercode}</pd:userCode>
+    <pd:demands>
+        <pd:demand id="GetRatings">
+        </pd:demand>
+    </pd:demands>
+</pd:pdRequest>
+XMLREQ;
+
+  $response = polldaddy_send_request($xml);
+  $response = polldaddy_clear_request($response);
+  $parsed = polldaddy_parse_response($response);
+  $ratings = array();
+  foreach($parsed as $rating){
+    if($rating['tag'] == 'PD:RATING' && isset($rating['attributes']['ID'])) {
+      $value = polldaddy_get_rating_results($settings, $usercode, $rating['attributes']['ID']);
+      $ratings[$rating['attributes']['ID']] = $value;
+    }
+  }
+
+  return $ratings;
+}
+
+/**
+ * Gets rating results for the entered poll id.
+ *
+ * @param $settings Polldaddy settings for connecting with API. Keyed array with at least a
+ *   `polldaddy_partner_guid` key containing API key.
+ * @param $usercode
+ *  The usercode returned from polldaddy to send with request.
+ * @param $id
+ *  The id of the rating to get.
+ *
+ * @return array
+ *  Return from the polldaddy api.
+ */
+function polldaddy_get_rating_results($settings, $usercode, $id) {
+  $xml = <<<XMLREQ
+<?xml version="1.0" encoding="utf-8" ?>
+<pd:pdRequest xmlns:pd="http://api.polldaddy.com/pdapi.xsd" partnerGUID="{$settings['polldaddy_partner_guid']}">
+    <pd:userCode>{$usercode}</pd:userCode>
+    <pd:demands>
+        <pd:demand id="GetRatingResults">
+            <pd:list start="0" end="30" id="{$id}">
+                <pd:period>ALL</pd:period>
+                <pd:uid></pd:uid>
+            </pd:list>
+        </pd:demand>
+    </pd:demands>
+</pd:pdRequest>
+XMLREQ;
+
+  $response = polldaddy_send_request($xml);
+  $response = polldaddy_clear_request($response);
+  $parsed = polldaddy_parse_response($response);
+
+  return $parsed;
+}
