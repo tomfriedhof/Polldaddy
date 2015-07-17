@@ -22,7 +22,7 @@ $plugin = array(
 function polldaddy_poll_render($subtype, $conf, $panel_args, $context) {
   $polldaddy_poll_id = $conf['polldaddy_poll_id'];
   $poll_id = ctools_context_keyword_substitute($polldaddy_poll_id, array(), array($context));
-  
+
   $block = new stdClass();
   $block->content = polldaddy_poll_view($poll_id);
   return $block;

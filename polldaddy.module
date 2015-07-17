@@ -99,7 +99,7 @@ function polldaddy_block_view($delta = NULL) {
     {$id} .pds-feedback-label{top: 19px;}
     {$id} .pds-comments{display: none !important;}
     {$id} .PDS_Poll {text-align: center;}</style>
-    ";    
+    ";
   }
 
   $block = array();
@@ -124,6 +124,38 @@ function polldaddy_poll_view($poll_id) {
 function polldaddy_block_save($delta, $edit) {
   variable_set("polldaddy_{$delta}_poll_id", $edit['poll_id']);
   variable_set("polldaddy_{$delta}_use_style", $edit['use_style']);
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function polldaddy_field_formatter_info() {
+  return array(
+    'polldaddy_pull' => array(
+      'label' => t('Polldaddy Poll'),
+      'field types' => array('text'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function polldaddy_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  $settings = $display['settings'];
+
+  switch ($display['type']) {
+    case 'polldaddy_pull':
+      foreach ($items as $delta => $item) {
+        $polldaddy_poll_id = $item['safe_value'];
+        $element[$delta] = array(
+          '#markup' => polldaddy_poll_view($polldaddy_poll_id),
+        );
+      }
+      break;
+  }
+  return $element;
 }
 
 /**
@@ -166,10 +198,10 @@ function polldaddy_page_reload(){
  */
 function _polldaddy_format_title($config) {
   module_load_include('php', 'polldaddy', 'polldaddy.api');
-  
+
   // If an administrative title is specified, use it.
   $polls = polldaddy_get_polls();
-  
+
   return 'Poll "'.$polls[$config['poll_id']].'"';
 }
 
